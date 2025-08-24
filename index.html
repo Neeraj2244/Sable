@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sunrise Patisserie — Delight in Every Bite</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header container">
+    <a class="brand" href="#" aria-label="Sunrise Patisserie home">
+      <!-- Dummy cake logo (inline SVG) -->
+      <svg class="logo" viewBox="0 0 64 64" width="48" height="48" aria-hidden="true" role="img">
+        <rect rx="10" width="64" height="64" fill="#FFF7F2"/>
+        <g transform="translate(6 8)">
+          <ellipse cx="26" cy="34" rx="22" ry="6" fill="#FCE8E6"/>
+          <rect x="8" y="6" width="32" height="16" rx="6" fill="#FFF"/>
+          <path d="M14 6c2-5 12-5 14 0" stroke="#F36F6A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="14" cy="18" r="2.2" fill="#F36F6A"/>
+          <circle cx="30" cy="18" r="2.2" fill="#F36F6A"/>
+        </g>
+      </svg>
+      <span class="brand-name">Sunrise Patisserie</span>
+    </a>
+
+    <nav class="site-nav" aria-label="Main navigation">
+      <button class="nav-toggle" aria-expanded="false" aria-controls="primary-menu" aria-label="Open menu">
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+
+      <ul id="primary-menu" class="menu" role="menubar">
+        <li role="none"><a role="menuitem" class="nav-link" href="#">Home</a></li>
+
+        <li class="menu-item dropdown" role="none">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="mega-menu">Menu ▾</button>
+
+          <!-- Mega dropdown with items + one-liners -->
+          <div id="mega-menu" class="dropdown-mega" role="menu" aria-label="Bakery menu">
+            <ul class="mega-grid" role="none">
+              <li class="mega-item" role="none">
+                <div class="ico-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 48 48"><g fill="none"><path d="M6 30c6-8 30-8 36 0" fill="#FDECEC"/><rect x="8" y="10" width="32" height="14" rx="4" fill="#FFF"/></g></svg>
+                </div>
+                <div>
+                  <strong>Cheesecake</strong>
+                  <p class="muted">Rich, creamy taste made with cream cheese, eggs, sugar & vanilla.</p>
+                </div>
+              </li>
+
+              <li class="mega-item" role="none">
+                <div class="ico-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 48 48"><g fill="none"><rect x="8" y="12" width="32" height="18" rx="4" fill="#FFF"/><path d="M12 30c6-7 24-7 30 0" fill="#FFECE8"/></g></svg>
+                </div>
+                <div>
+                  <strong>Cakes</strong>
+                  <p class="muted">Layered delight with butter, flour, eggs & signature frostings.</p>
+                </div>
+              </li>
+
+              <li class="mega-item" role="none">
+                <div class="ico-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 48 48"><g fill="none"><path d="M8 26c5-6 27-6 34 0" fill="#FFF7E6"/><rect x="10" y="14" width="28" height="8" rx="3" fill="#FFF"/></g></svg>
+                </div>
+                <div>
+                  <strong>Pastry</strong>
+                  <p class="muted">Flaky, buttery layers crafted from butter, flour & folded dough.</p>
+                </div>
+              </li>
+
+              <li class="mega-item" role="none">
+                <div class="ico-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 48 48"><g fill="none"><rect x="12" y="18" width="24" height="10" rx="3" fill="#FFF"/><path d="M18 18c2-4 12-4 14 0" stroke="#F36F6A" stroke-width="1.6" fill="none"/></g></svg>
+                </div>
+                <div>
+                  <strong>Cupcakes</strong>
+                  <p class="muted">Cute & moist, made with butter, sugar, eggs & seasonal frostings.</p>
+                </div>
+              </li>
+
+              <li class="mega-item" role="none">
+                <div class="ico-wrap" aria-hidden="true">
+                  <svg viewBox="0 0 48 48"><g fill="none"><path d="M8 28c6-8 26-8 34 0" fill="#FFF1D8"/><rect x="10" y="18" width="28" height="8" rx="4" fill="#FFF"/></g></svg>
+                </div>
+                <div>
+                  <strong>Bread</strong>
+                  <p class="muted">Artisan loaves with flour, water, yeast & long fermentation for depth.</p>
+                </div>
+              </li>
+            </ul>
+            <div class="mega-cta">
+              <a class="btn" href="#menu-section">Explore full menu</a>
+            </div>
+          </div>
+        </li>
+
+        <li role="none"><a role="menuitem" class="nav-link" href="#contact">Contact Us</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <div class="hero-left">
+        <h1 class="reveal">Baked fresh every morning — taste the love.</h1>
+        <p class="lead reveal">
+          Sunrise Patisserie blends classic techniques with seasonal ingredients to create cakes,
+          cupcakes and pastries that make every moment sweeter.
+        </p>
+        <div class="hero-actions reveal">
+          <a class="btn" href="#menu-section">View Menu</a>
+          <a class="btn ghost" href="#contact">Order Now</a>
+        </div>
+      </div>
+      <div class="hero-right reveal">
+        <div class="floating-group" aria-hidden="true">
+          <svg class="cake-large" viewBox="0 0 120 120">
+            <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#FFD7D5"/><stop offset="1" stop-color="#FFF1E6"/></linearGradient></defs>
+            <circle cx="60" cy="60" r="56" fill="url(#g1)"/>
+            <g transform="translate(14,18)">
+              <rect x="8" y="26" width="80" height="36" rx="12" fill="#FFF"/>
+              <path d="M14 26c8-10 56-10 64 0" fill="#FCD2D0"/>
+            </g>
+          </svg>
+
+          <svg class="cupcake-small" viewBox="0 0 64 64">
+            <rect rx="10" width="64" height="64" fill="transparent"/>
+            <g transform="translate(6 6)">
+              <rect x="8" y="20" width="40" height="18" rx="4" fill="#FFF"/>
+              <path d="M14 20c3-6 20-6 23 0" stroke="#F36F6A" stroke-width="1.2" fill="none"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section id="menu-section" class="menu-section container">
+      <h2 class="section-title reveal">Our specialties</h2>
+      <p class="muted reveal">Handmade treats — each item shows a short descriptor of ingredients and its rich taste.</p>
+
+      <div class="cards reveal-grid">
+        <article class="card">
+          <div class="img-wrap">
+            <svg viewBox="0 0 120 90" class="food-img" aria-hidden="true">
+              <g transform="translate(10,8)"><rect x="12" y="34" width="86" height="28" rx="8" fill="#FFF"/><path d="M22 34c6-8 44-8 56 0" fill="#FFD9D8"/></g>
+            </svg>
+          </div>
+          <h3>Cupcakes</h3>
+          <p class="muted">Moist, fluffy cupcakes made with butter, sugar, eggs — rich in flavor and texture.</p>
+          <a class="link" href="#">See flavors ▸</a>
+        </article>
+
+        <article class="card">
+          <div class="img-wrap">
+            <svg viewBox="0 0 120 90" class="food-img" aria-hidden="true">
+              <g transform="translate(8,6)"><rect x="10" y="24" width="100" height="40" rx="10" fill="#FFF"/><path d="M14 24c10-12 80-12 92 0" fill="#FFE9E9"/></g>
+            </svg>
+          </div>
+          <h3>Cheesecake</h3>
+          <p class="muted">Velvety, dense cheesecake with cream cheese, eggs & a buttery biscuit base — indulgently rich.</p>
+          <a class="link" href="#">Order a slice ▸</a>
+        </article>
+
+        <article class="card">
+          <div class="img-wrap">
+            <svg viewBox="0 0 120 90" class="food-img" aria-hidden="true">
+              <g transform="translate(8,8)"><rect x="12" y="24" width="96" height="34" rx="8" fill="#FFF"/><path d="M18 24c8-9 64-9 80 0" fill="#FFF3E6"/></g>
+            </svg>
+          </div>
+          <h3>Pastries</h3>
+          <p class="muted">Flaky, buttery pastries folded by hand with butter and care — crisp outside, soft inside.</p>
+          <a class="link" href="#">Fresh today ▸</a>
+        </article>
+      </div>
+    </section>
+
+    <section id="contact" class="contact container">
+      <h2 class="section-title reveal">Contact & Orders</h2>
+      <p class="muted reveal">Call or visit us to place an order, or use the form below to request a custom cake.</p>
+      <form class="contact-form reveal" action="#" onsubmit="return false;">
+        <div class="form-row">
+          <input type="text" placeholder="Your name" required />
+          <input type="email" placeholder="Email" required />
+        </div>
+        <textarea placeholder="Tell us what you'd like (date, flavors, size)"></textarea>
+        <div class="form-actions">
+          <button class="btn" type="submit">Send request</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container small">
+      <p>&copy; 2025 Sunrise Patisserie • 123 Sweet St • (555) 555-0123</p>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
