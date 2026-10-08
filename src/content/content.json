@@ -1,7 +1,7 @@
 {
   "brand": {
     "name": "sera",
-    "contactEmail": "hello@sera-tiramisu.com"
+    "contactEmail": "hellocake@sera-tiramisu.com"
   },
   "nav": {
     "menu": "Our tiramisu",
@@ -58,7 +58,7 @@
     "products": [
       {
         "id": "classico",
-        "name": "Il Classico",
+        "name": "Il Classico Coffee",
         "label": "THE ORIGINAL",
         "description": "Our signature: bold espresso, cloud-soft mascarpone, the perfect cocoa finish.",
         "size": "Serves 6",
