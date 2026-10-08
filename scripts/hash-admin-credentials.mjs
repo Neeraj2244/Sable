@@ -9,8 +9,9 @@ const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
 const password = process.env.ADMIN_PASSWORD;
 
 if (!email || !password) {
-  console.error("ADMIN_EMAIL and ADMIN_PASSWORD must both be set.");
-  process.exit(1);
+  // Shown as a warning on the GitHub Actions run; the site still deploys without an admin login.
+  console.error("::warning::ADMIN_EMAIL and ADMIN_PASSWORD secrets are not set, so the admin panel will show “sign-in isn’t set up”.");
+  process.exit(0);
 }
 
 // Keep in sync with src/admin/auth.ts.

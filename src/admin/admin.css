@@ -28,8 +28,7 @@
 /* Fields */
 .admin-field { display: flex; flex-direction: column; gap: 7px; }
 .admin-field > label, .admin-field > span, .admin-list-label { color: #4a3a2e; font-size: 14px; font-weight: 600; }
-.admin-field > small { color: var(--a-muted); font-size: 13px; }
-.admin-shell input:not([type="file"]):not([type="radio"]), .admin-shell textarea, .admin-shell select, .admin-login input { width: 100%; min-height: 44px; padding: 10px 13px; border: 1px solid #ddd6c9; border-radius: 10px; background: #fff; color: var(--a-ink); font-size: 15px; transition: border-color 160ms ease, box-shadow 160ms ease; }
+.admin-shell input:not([type="file"]):not([type="radio"]):not([type="checkbox"]), .admin-shell textarea, .admin-shell select, .admin-login input { width: 100%; min-height: 44px; padding: 10px 13px; border: 1px solid #ddd6c9; border-radius: 10px; background: #fff; color: var(--a-ink); font-size: 15px; transition: border-color 160ms ease, box-shadow 160ms ease; }
 .admin-shell textarea { line-height: 1.55; resize: vertical; }
 .admin-shell input:focus, .admin-shell textarea:focus, .admin-shell select:focus, .admin-login input:focus { border-color: #9b8767; box-shadow: 0 0 0 3px rgba(150, 128, 92, 0.16); outline: 0; }
 .admin-number { position: relative; max-width: 220px; }
@@ -97,7 +96,7 @@
 
 /* Settings dialog */
 .admin-dialog-backdrop { position: fixed; z-index: 50; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(39, 29, 21, 0.45); }
-.admin-dialog { display: flex; width: min(540px, 100%); max-height: calc(100vh - 32px); flex-direction: column; gap: 16px; overflow: auto; padding: 26px 26px 22px; border-radius: 18px; background: var(--a-panel); box-shadow: 0 24px 60px rgba(31, 22, 15, 0.25); }
+.admin-dialog { display: flex; width: min(540px, 100%); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); flex-direction: column; gap: 16px; overflow: auto; padding: 26px 26px 22px; border-radius: 18px; background: var(--a-panel); box-shadow: 0 24px 60px rgba(31, 22, 15, 0.25); }
 .admin-dialog > p { margin: 0; color: var(--a-muted); }
 .admin-dialog-head { display: flex; align-items: center; justify-content: space-between; }
 .admin-dialog-head h2 { margin: 0; font-family: var(--serif); font-size: 25px; font-weight: 500; }
@@ -130,3 +129,15 @@
   .admin-dialog-row { grid-template-columns: 1fr; }
   .admin-login-card { padding: 28px 20px 22px; }
 }
+
+.admin-color { display: flex; align-items: center; gap: 10px; max-width: 260px; }
+.admin-shell .admin-color input[type="color"] { width: 52px; min-height: 44px; flex: 0 0 auto; padding: 4px; cursor: pointer; }
+.admin-check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.admin-check input { width: 18px; height: 18px; margin-top: 3px; flex: 0 0 auto; accent-color: var(--a-accent); }
+.admin-check span { display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.admin-check small { color: var(--a-muted); font-size: 13px; }
+
+.admin-field-foot { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.admin-field-foot > small { color: var(--a-muted); font-size: 13px; }
+.admin-counter { flex: 0 0 auto; margin-left: auto; font-variant-numeric: tabular-nums; }
+.admin-counter.is-over { color: var(--a-danger) !important; font-weight: 700; }

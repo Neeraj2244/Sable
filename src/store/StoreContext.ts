@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 import type { SiteContent } from "../content/types";
 import type { useCart } from "../hooks/useCart";
 
-export type StorePage = "home" | "payment" | "success";
+export type StorePage = "home" | "products" | "payment" | "success";
 
 export type Store = {
   content: SiteContent;

@@ -1,19 +1,22 @@
-import { useEffect, useId, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { createContext, useContext, useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { Icon } from "../components/Icon";
-import { assetUrl, DRAFT_STORAGE_KEY, publishedContent, readDraft } from "../content";
+import { assetUrl, DRAFT_STORAGE_KEY, normalizeContent, publishedContent, readDraft } from "../content";
 import { iconNames, type IconName, type SiteContent } from "../content/types";
 import { useDialog } from "../hooks/useDialog";
 import { getJson, setJson } from "../lib/storage";
 import { authConfigured, hasSession, signIn, signOut } from "./auth";
 import { checkAccess, loadConfig, publishContent, saveConfig, uploadImage, type GitHubConfig } from "./github";
 import { optimiseImage } from "./image";
-import { sections, type Field, type ListField } from "./schema";
+import { findLimitErrors, sections, type Field, type ListField } from "./schema";
 import "./admin.css";
 
 type Path = (string | number)[];
 type Status = { tone: "info" | "success" | "error"; text: string; link?: { href: string; label: string } } | null;
 
 const PUBLISHED_KEY = "sable-admin-published";
+
+// Lets field editors read other parts of the draft (e.g. the category list for a product's dropdown).
+const DraftContext = createContext<SiteContent>(publishedContent);
 
 function setIn<T>(target: T, path: Path, value: unknown): T {
   if (path.length === 0) return value as T;
@@ -75,7 +78,8 @@ function LoginScreen({ onSignedIn }: { onSignedIn: () => void }) {
 
 function Editor({ onSignOut }: { onSignOut: () => void }) {
   const [baseline, setBaseline] = useState<SiteContent>(() => {
-    const stored = getJson<SiteContent>(PUBLISHED_KEY);
+    const raw = getJson<unknown>(PUBLISHED_KEY);
+    const stored = raw ? normalizeContent(raw) : null;
     // Once the rebuilt site carries what we published, forget the local copy.
     if (!stored || same(stored, publishedContent)) {
       setJson(PUBLISHED_KEY, null);
@@ -91,8 +95,11 @@ function Editor({ onSignOut }: { onSignOut: () => void }) {
   const [publishing, setPublishing] = useState(false);
   const [imagePreviews, setImagePreviews] = useState<Record<string, string>>({});
   const importRef = useRef<HTMLInputElement>(null);
-  const dirty = !same(draft, baseline);
+  const changed = useMemo(() => new Set(sections.filter((item) => !same(draft[item.id], baseline[item.id])).map((item) => item.id)), [draft, baseline]);
+  const dirty = changed.size > 0;
   const section = sections.find((item) => item.id === activeId) ?? sections[0];
+  const previewUrls = useRef<string[]>([]);
+  useEffect(() => () => previewUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
 
   useEffect(() => {
     setJson(DRAFT_STORAGE_KEY, dirty ? draft : null);
@@ -116,12 +123,19 @@ function Editor({ onSignOut }: { onSignOut: () => void }) {
 
   const handleUpload = async (file: File): Promise<string | null> => {
     if (needsToken()) return null;
+    // SVG and other formats can carry script that would run on the site origin.
+    if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) {
+      setStatus({ tone: "error", text: "Please upload a JPG, PNG, WebP or AVIF photo." });
+      return null;
+    }
     setStatus({ tone: "info", text: `Optimising and uploading ${file.name}…` });
     try {
       const image = await optimiseImage(file);
       if (image.size > 5 * 1024 * 1024) throw new Error("It is still over 5 MB after optimising; please use a smaller photo.");
       const path = await uploadImage(config, image, file.name);
-      setImagePreviews((current) => ({ ...current, [path]: URL.createObjectURL(image) }));
+      const preview = URL.createObjectURL(image);
+      previewUrls.current.push(preview);
+      setImagePreviews((current) => ({ ...current, [path]: preview }));
       setStatus({ tone: "success", text: "Image uploaded. Publish to put it on the site." });
       return path;
     } catch (error) {
@@ -131,6 +145,12 @@ function Editor({ onSignOut }: { onSignOut: () => void }) {
   };
 
   const publish = async () => {
+    const tooLong = findLimitErrors(draft);
+    if (tooLong.length) {
+      const first = tooLong[0];
+      setStatus({ tone: "error", text: `${first.section} → ${first.item ? `${first.item} → ` : ""}${first.field} is ${first.length} characters; the limit is ${first.max}.${tooLong.length > 1 ? ` ${tooLong.length - 1} more field(s) are also too long.` : ""}` });
+      return;
+    }
     if (needsToken()) return;
     setPublishing(true);
     setStatus({ tone: "info", text: "Publishing…" });
@@ -166,19 +186,27 @@ function Editor({ onSignOut }: { onSignOut: () => void }) {
     event.target.value = "";
     if (!file) return;
     try {
-      const parsed = JSON.parse(await file.text()) as SiteContent;
-      const missing = sections.filter((item) => typeof parsed[item.id] !== "object").map((item) => item.title);
-      if (missing.length) throw new Error(`Missing sections: ${missing.join(", ")}`);
-      setDraft(parsed);
-      setStatus({ tone: "success", text: "Backup loaded. Review it, then publish." });
+      const raw = JSON.parse(await file.text()) as Partial<SiteContent>;
+      // Older backups may lack newer sections; those are filled from the live site.
+      const missing = sections.filter((item) => typeof raw[item.id] !== "object").map((item) => item.title);
+      if (missing.length === sections.length) throw new Error("It doesn’t contain any site sections.");
+      setDraft(normalizeContent(raw));
+      setStatus({ tone: "success", text: missing.length ? `Backup loaded. ${missing.join(", ")} came from the live site. Review, then publish.` : "Backup loaded. Review it, then publish." });
     } catch (error) {
       setStatus({ tone: "error", text: `That file isn’t a valid backup. ${(error as Error).message}` });
     }
   };
 
   const openPreview = () => {
-    setJson(DRAFT_STORAGE_KEY, draft);
+    setJson(DRAFT_STORAGE_KEY, dirty ? draft : null);
     window.open(`${import.meta.env.BASE_URL}?preview=1`, "_blank", "noopener");
+  };
+
+  const saveSettings = (next: GitHubConfig) => {
+    saveConfig(next);
+    setConfig(loadConfig());
+    setSettingsOpen(false);
+    setStatus({ tone: "success", text: next.remember ? "Publishing settings saved on this device." : "Publishing settings saved until you close this tab." });
   };
 
   return (
@@ -204,8 +232,7 @@ function Editor({ onSignOut }: { onSignOut: () => void }) {
           <label className="admin-section-select"><span className="sr-only">Section</span><select value={activeId} onChange={(event) => setActiveId(event.target.value)}>{sections.map((item) => <option value={item.id} key={item.id}>{item.title}</option>)}</select></label>
           <ul>
             {sections.map((item) => {
-              const changed = !same(draft[item.id], baseline[item.id]);
-              return <li key={item.id}><button type="button" className={item.id === activeId ? "is-active" : ""} onClick={() => setActiveId(item.id)}>{item.title}{changed && <span className="admin-dot" aria-label="changed" />}</button></li>;
+              return <li key={item.id}><button type="button" className={item.id === activeId ? "is-active" : ""} aria-current={item.id === activeId ? "page" : undefined} onClick={() => setActiveId(item.id)}>{item.title}{changed.has(item.id) && <span className="admin-dot"><span className="sr-only"> (changed)</span></span>}</button></li>;
             })}
           </ul>
           <div className="admin-sidebar-footer">
@@ -218,6 +245,7 @@ function Editor({ onSignOut }: { onSignOut: () => void }) {
           </div>
         </nav>
 
+        <DraftContext.Provider value={draft}>
         <main className="admin-main">
           <div className="admin-section-head">
             <h1>{section.title}</h1>
@@ -225,13 +253,14 @@ function Editor({ onSignOut }: { onSignOut: () => void }) {
           </div>
           <div className="admin-fields">
             {section.fields.map((field) => (
-              <FieldEditor key={field.key} field={field} value={getIn(draft, [section.id, field.key])} onChange={(value) => update([section.id, field.key], value)} onUpload={handleUpload} previews={imagePreviews} />
+              <FieldEditor key={`${section.id}.${field.key}`} field={field} value={getIn(draft, [section.id, field.key])} onChange={(value) => update([section.id, field.key], value)} onUpload={handleUpload} previews={imagePreviews} />
             ))}
           </div>
         </main>
+        </DraftContext.Provider>
       </div>
 
-      {settingsOpen && <SettingsDialog config={config} onClose={() => setSettingsOpen(false)} onSave={(next) => { saveConfig(next); setConfig(loadConfig()); setSettingsOpen(false); setStatus({ tone: "success", text: "Publishing settings saved on this device." }); }} />}
+      {settingsOpen && <SettingsDialog config={config} onClose={() => setSettingsOpen(false)} onSave={saveSettings} />}
     </div>
   );
 }
@@ -245,26 +274,38 @@ function FieldEditor({ field, ...props }: EditorProps & { field: Field }) {
 
 function ScalarEditor({ field, ...props }: EditorProps & { field: Exclude<Field, ListField> }) {
   const id = useId();
+  const { categories } = useContext(DraftContext).menu;
   const { value, onChange } = props;
+  const text = String(value ?? "");
+  const labelId = `${id}-label`;
 
   let control;
   if (field.type === "textarea") {
-    control = <textarea id={id} rows={Math.min(8, Math.max(3, String(value ?? "").split("\n").length + 1))} value={String(value ?? "")} onChange={(event) => onChange(event.target.value)} />;
+    control = <textarea id={id} rows={Math.min(8, Math.max(3, text.split("\n").length + 1))} maxLength={field.max} value={text} onChange={(event) => onChange(event.target.value)} />;
   } else if (field.type === "number") {
     control = <div className="admin-number"><span>₹</span><input id={id} type="number" min={0} step={1} inputMode="numeric" value={Number(value ?? 0)} onChange={(event) => onChange(Math.max(0, Math.round(Number(event.target.value) || 0)))} /></div>;
   } else if (field.type === "image") {
     control = <ImagePicker id={id} {...props} />;
   } else if (field.type === "icon") {
-    control = <IconPicker value={value as IconName} onChange={onChange} />;
+    control = <IconPicker labelledBy={labelId} value={value as IconName} onChange={onChange} />;
+  } else if (field.type === "category") {
+    control = <select id={id} value={text} onChange={(event) => onChange(event.target.value)}><option value="">No category</option>{categories.map((c) => <option value={c.id} key={c.id}>{c.name || "Untitled category"}</option>)}</select>;
+  } else if (field.type === "color") {
+    control = <div className="admin-color"><input id={id} type="color" value={String(value || "#000000")} onChange={(event) => onChange(event.target.value)} /><input aria-label={`${field.label} hex`} value={text} onChange={(event) => onChange(event.target.value)} /></div>;
   } else {
-    control = <input id={id} type={field.type === "email" ? "email" : "text"} value={String(value ?? "")} onChange={(event) => onChange(event.target.value)} />;
+    control = <input id={id} type={field.type === "email" || field.type === "url" ? field.type : "text"} maxLength={field.max} value={text} onChange={(event) => onChange(event.target.value)} />;
   }
 
   return (
     <div className="admin-field">
-      <label htmlFor={id}>{field.label}</label>
+      <label id={labelId} htmlFor={field.type === "icon" ? undefined : id}>{field.label}</label>
       {control}
-      {field.hint && <small>{field.hint}</small>}
+      {(field.hint || field.max) && (
+        <div className="admin-field-foot">
+          {field.hint && <small>{field.hint}</small>}
+          {field.max && <small className={`admin-counter${text.length > field.max ? " is-over" : ""}`} aria-live="polite">{text.length}/{field.max}</small>}
+        </div>
+      )}
     </div>
   );
 }
@@ -293,10 +334,13 @@ function ImagePicker({ id, value, onChange, onUpload, previews }: EditorProps & 
   );
 }
 
-function IconPicker({ value, onChange }: { value: IconName; onChange: (value: unknown) => void }) {
+// Interface icons (arrows, close…) make no sense as section illustrations.
+const PICKABLE_ICONS = iconNames.filter((name) => !["arrow-left", "arrow-right", "arrow-up-right", "plus", "minus", "close", "menu", "chevron-down"].includes(name));
+
+function IconPicker({ value, onChange, labelledBy }: { value: IconName; onChange: (value: unknown) => void; labelledBy: string }) {
   return (
-    <div className="admin-icons" role="radiogroup">
-      {iconNames.filter((name) => !["arrow-left", "arrow-right", "arrow-up-right", "plus", "minus", "close", "menu", "chevron-down"].includes(name)).map((name) => (
+    <div className="admin-icons" role="radiogroup" aria-labelledby={labelledBy}>
+      {PICKABLE_ICONS.map((name) => (
         <button type="button" role="radio" aria-checked={value === name} aria-label={name} title={name} className={value === name ? "is-active" : ""} onClick={() => onChange(name)} key={name}><Icon name={name} size={18} /></button>
       ))}
     </div>
@@ -307,13 +351,13 @@ function ListEditor({ field, value, onChange, onUpload, previews }: EditorProps 
   const items = (Array.isArray(value) ? value : []) as unknown[];
   const [open, setOpen] = useState<number | null>(null);
 
+  const replaceAt = (index: number, next: unknown) => onChange(items.map((entry, i) => (i === index ? next : entry)));
   const move = (from: number, to: number) => {
     if (to < 0 || to >= items.length) return;
     const next = [...items];
-    const [moved] = next.splice(from, 1);
-    next.splice(to, 0, moved);
+    [next[from], next[to]] = [next[to], next[from]];
     onChange(next);
-    if (open === from) setOpen(to);
+    setOpen(open === from ? to : open === to ? from : open);
   };
   const remove = (index: number) => {
     const title = field.itemTitle ? field.itemTitle(items[index] as Record<string, unknown>) : String(items[index] || `this ${field.singular}`);
@@ -340,7 +384,7 @@ function ListEditor({ field, value, onChange, onUpload, previews }: EditorProps 
           );
 
           if (!field.item) {
-            return <li className="admin-list-row" key={index}><input aria-label={`${field.singular} ${index + 1}`} value={String(item ?? "")} onChange={(event) => onChange(items.map((entry, entryIndex) => entryIndex === index ? event.target.value : entry))} />{controls}</li>;
+            return <li className="admin-list-row" key={index}><input aria-label={`${field.singular} ${index + 1}`} value={String(item ?? "")} onChange={(event) => replaceAt(index, event.target.value)} />{controls}</li>;
           }
 
           const record = item as Record<string, unknown>;
@@ -358,7 +402,7 @@ function ListEditor({ field, value, onChange, onUpload, previews }: EditorProps 
               </div>
               {isOpen && (
                 <div className="admin-list-item-body">
-                  {field.item.map((sub) => <FieldEditor key={sub.key} field={sub} value={record[sub.key]} onChange={(next) => onChange(items.map((entry, entryIndex) => entryIndex === index ? { ...(entry as object), [sub.key]: next } : entry))} onUpload={onUpload} previews={previews} />)}
+                  {field.item.map((sub) => <FieldEditor key={sub.key} field={sub} value={record[sub.key]} onChange={(next) => replaceAt(index, { ...record, [sub.key]: next })} onUpload={onUpload} previews={previews} />)}
                 </div>
               )}
             </li>
@@ -405,6 +449,7 @@ function SettingsDialog({ config, onClose, onSave }: { config: GitHubConfig; onC
           <label className="admin-field"><span>Branch</span><input value={form.branch} onChange={(event) => setForm({ ...form, branch: event.target.value })} placeholder="main" /></label>
         </div>
         {check && <div className={`admin-alert admin-alert-${check.tone}`}>{check.text}</div>}
+        <label className="admin-check"><input type="checkbox" checked={form.remember} onChange={(event) => setForm({ ...form, remember: event.target.checked })} /><span><strong>Remember on this device</strong><small>Leave off on shared computers. Off means you paste the token again after closing the tab.</small></span></label>
         <div className="admin-dialog-actions">
           <button type="button" className="admin-button" onClick={test} disabled={!form.token || !form.repo}>Test connection</button>
           <button type="submit" className="admin-button admin-button-primary">Save</button>

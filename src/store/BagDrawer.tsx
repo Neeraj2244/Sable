@@ -1,5 +1,6 @@
 import { Icon } from "../components/Icon";
 import { Eyebrow, PillButton, QuantityControl } from "../components/ui";
+import { MAX_QTY } from "../hooks/useCart";
 import { assetUrl, formatMoney } from "../content";
 import { useDialog } from "../hooks/useDialog";
 import { useStore } from "./StoreContext";
@@ -21,7 +22,7 @@ export function BagDrawer({ open, onClose }: { open: boolean; onClose: () => voi
             <span className="empty-bag-icon"><Icon name="bag" size={24} /></span>
             <h3>Nothing sweet in here yet.</h3>
             <p>Pick a favourite and we will take it from here.</p>
-            <PillButton tone="dark" onClick={() => { onClose(); goTo("home"); }}>Explore the menu</PillButton>
+            <PillButton tone="dark" onClick={() => { onClose(); goTo("products"); }}>Explore the menu</PillButton>
           </div>
         ) : (
           <>
@@ -31,7 +32,7 @@ export function BagDrawer({ open, onClose }: { open: boolean; onClose: () => voi
                   <img src={assetUrl(product.image)} alt="" />
                   <div className="drawer-item-info">
                     <h3>{product.name}</h3><span>{product.size}</span><strong>{formatMoney(product.price)}</strong>
-                    <QuantityControl name={product.name} qty={qty} onChange={(amount) => cart.change(product.id, amount)} />
+                    <QuantityControl name={product.name} qty={qty} max={MAX_QTY} onChange={(amount) => cart.change(product.id, amount)} />
                   </div>
                   <button className="remove-item" type="button" aria-label={`Remove ${product.name} from your bag`} onClick={() => cart.remove(product.id)}><Icon name="close" size={15} /></button>
                 </article>

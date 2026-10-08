@@ -4,6 +4,7 @@
     "contactEmail": "hellocake@sera-tiramisu.com"
   },
   "nav": {
+    "products": "Products",
     "menu": "Our tiramisu",
     "craft": "The Sera way",
     "stories": "At our table",
@@ -53,11 +54,25 @@
     "eyebrow": "Pick your little moment",
     "title": "A good place to start.",
     "intro": "Whisked in small batches. Sent chilled. Best enjoyed with nowhere else to be.",
+    "viewMore": "View more",
     "footnote": "Every order is packed cool and travels with care.",
     "footnoteLink": "See delivery details",
+    "categories": [
+      {
+        "id": "tiramisu",
+        "name": "Tiramisu",
+        "description": "Hand-whisked mascarpone, proper espresso, layered slowly."
+      },
+      {
+        "id": "cakes",
+        "name": "Cakes",
+        "description": "Celebration cakes and everyday slices from the same slow kitchen."
+      }
+    ],
     "products": [
       {
         "id": "classico",
+        "category": "tiramisu",
         "name": "Il Classico Coffee",
         "label": "THE ORIGINAL",
         "description": "Our signature: bold espresso, cloud-soft mascarpone, the perfect cocoa finish.",
@@ -68,6 +83,7 @@
       },
       {
         "id": "pistacchio",
+        "category": "tiramisu",
         "name": "Pistacchio",
         "label": "A LITTLE EXTRA",
         "description": "Silky pistachio cream meets our espresso-soaked, very Italian original.",
@@ -78,6 +94,7 @@
       },
       {
         "id": "mini",
+        "category": "tiramisu",
         "name": "Piccoli Momenti",
         "label": "SPOON-READY",
         "description": "Little individual jars. Same slow-made layers. Absolutely no sharing required.",
@@ -88,6 +105,7 @@
       },
       {
         "id": "tasting",
+        "category": "tiramisu",
         "name": "Il Giro d'Italia",
         "label": "THE TASTING BOX",
         "description": "A little tour of our table: Classico, Pistacchio, and the seasonal special.",
@@ -98,6 +116,12 @@
         "imagePosition": "71% center"
       }
     ]
+  },
+  "shop": {
+    "eyebrow": "Everything from our kitchen",
+    "title": "Pick your\nlittle moment.",
+    "intro": "Tiramisu, cakes and everything in between. Swipe through each row, add your favourites, and we will pack them cool.",
+    "comingSoon": "Fresh additions are on their way. Check back soon."
   },
   "feature": {
     "eyebrow": "The Sera way",
@@ -196,6 +220,28 @@
       {
         "question": "What about allergens?",
         "answer": "Our traditional tiramisu contains milk, wheat, and eggs. Some recipes include nuts. Full ingredient and allergen information is included with each product before checkout."
+      }
+    ]
+  },
+  "apps": {
+    "eyebrow": "Craving it a little sooner?",
+    "title": "Also on Zomato\nand Swiggy.",
+    "body": "Same slow-made tiramisu, through the apps you already love. Perfect for a last-minute dessert run or a sweet surprise at the door.",
+    "note": "Prices, delivery times and offers on Zomato and Swiggy are set by each app and may differ from ours.",
+    "platforms": [
+      {
+        "name": "Zomato",
+        "tagline": "Quick delivery near you",
+        "url": "https://www.zomato.com",
+        "logo": "images/zomato-logo.webp",
+        "color": "#E23744"
+      },
+      {
+        "name": "Swiggy",
+        "tagline": "Dessert at your door, fast",
+        "url": "https://www.swiggy.com",
+        "logo": "images/swiggy-logo.webp",
+        "color": "#FF5200"
       }
     ]
   },

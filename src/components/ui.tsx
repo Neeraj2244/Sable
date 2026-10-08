@@ -14,21 +14,22 @@ export function Eyebrow({ children, dot = true, className = "", ...rest }: Compo
 
 type PillProps = { tone: "cream" | "dark"; icon?: IconName; children: ReactNode; className?: string };
 
-/** The rounded call-to-action with a circular arrow on the right, as a link or a button. */
-export function PillLink({ tone, icon = "arrow-up-right", children, className = "", ...rest }: PillProps & Omit<ComponentProps<"a">, "className">) {
-  return <a className={`button button-${tone} ${className}`} {...rest}><span>{children}</span><span className="button-icon"><Icon name={icon} size={17} /></span></a>;
-}
+// The rounded call-to-action with a circular arrow on the right, as a link or a button.
+const pillClass = (tone: PillProps["tone"], extra = "") => `button button-${tone} ${extra}`.trim();
+const PillBody = ({ children, icon }: { children: ReactNode; icon: IconName }) => <><span>{children}</span><span className="button-icon"><Icon name={icon} size={17} /></span></>;
 
-export function PillButton({ tone, icon = "arrow-right", children, className = "", ...rest }: PillProps & Omit<ComponentProps<"button">, "className">) {
-  return <button className={`button button-${tone} ${className}`} type="button" {...rest}><span>{children}</span><span className="button-icon"><Icon name={icon} size={17} /></span></button>;
-}
+export const PillLink = ({ tone, icon = "arrow-up-right", children, className, ...rest }: PillProps & Omit<ComponentProps<"a">, "className">) =>
+  <a className={pillClass(tone, className)} {...rest}><PillBody icon={icon}>{children}</PillBody></a>;
+
+export const PillButton = ({ tone, icon = "arrow-right", children, className, ...rest }: PillProps & Omit<ComponentProps<"button">, "className">) =>
+  <button className={pillClass(tone, className)} type="button" {...rest}><PillBody icon={icon}>{children}</PillBody></button>;
 
 export function TextLink({ children, icon = "arrow-right", ...rest }: ComponentProps<"a"> & { icon?: IconName }) {
   return <a className="underlined-link" {...rest}>{children} <Icon name={icon} size={16} /></a>;
 }
 
 export const Stars = ({ size }: { size: number }) => (
-  <span className="love-stars" aria-label="Five stars">{[0, 1, 2, 3, 4].map((i) => <Icon name="star" size={size} key={i} />)}</span>
+  <span className="love-stars" role="img" aria-label="Five stars">{[0, 1, 2, 3, 4].map((i) => <Icon name="star" size={size} key={i} />)}</span>
 );
 
 type AttributionProps = { initials: string; name: string; detail: string; large?: boolean; reveal?: boolean };
@@ -37,15 +38,20 @@ export function Attribution({ initials, name, detail, large, reveal }: Attributi
   return <div className="love-attribution" data-reveal={reveal || undefined}><span className={`avatar-initial${large ? " avatar-large" : ""}`}>{initials}</span><span><strong>{name}</strong><small>{detail}</small></span></div>;
 }
 
-export function QuantityControl({ name, qty, onChange, className = "quantity-control", size = 13 }: { name: string; qty: number; onChange: (amount: number) => void; className?: string; size?: number }) {
+type QuantityProps = { name: string; qty: number; max: number; onChange: (amount: number) => void; className?: string; size?: number };
+
+export function QuantityControl({ name, qty, max, onChange, className = "quantity-control", size = 13 }: QuantityProps) {
   return (
-    <div className={className}>
+    <div className={className} role="group" aria-label={`${name} quantity`}>
       <button type="button" aria-label={`Remove one ${name}`} onClick={() => onChange(-1)}><Icon name="minus" size={size} /></button>
-      <span aria-label={`Quantity ${qty}`}>{qty}</span>
-      <button type="button" aria-label={`Add one ${name}`} onClick={() => onChange(1)}><Icon name="plus" size={size} /></button>
+      <output aria-live="polite">{qty}</output>
+      <button type="button" aria-label={qty >= max ? `${name}: maximum of ${max} reached` : `Add one ${name}`} onClick={() => onChange(1)} disabled={qty >= max}><Icon name="plus" size={size} /></button>
     </div>
   );
 }
+
+/** One line shared by every footer. */
+export const Copyright = ({ name }: { name: string }) => <span>&copy; {new Date().getFullYear()} {titleCase(name)} Tiramisu</span>;
 
 export function Brand({ name }: { name: string }) {
   return (

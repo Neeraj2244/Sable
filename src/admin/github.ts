@@ -2,26 +2,37 @@
 // Each commit triggers .github/workflows/deploy.yml, which rebuilds the site.
 import { getJson, setJson } from "../lib/storage";
 
-export const CONTENT_PATH = "src/content/content.json";
-export const IMAGE_DIR = "public/images";
+const CONTENT_PATH = "src/content/content.json";
+const IMAGE_DIR = "public/images";
+// "owner/name" only: no "..", so a typo can never point the token at other API paths.
+const REPO_PATTERN = /^[\w-]+\/(?!\.\.?$)[\w.-]+$/;
+const EXTENSIONS: Record<string, string> = { "image/webp": "webp", "image/jpeg": "jpg", "image/png": "png", "image/avif": "avif" };
 
 const CONFIG_KEY = "sable-admin-github";
 
-export type GitHubConfig = { token: string; repo: string; branch: string };
+export type GitHubConfig = { token: string; repo: string; branch: string; remember: boolean };
 
 export function loadConfig(): GitHubConfig {
-  const saved = getJson<Partial<GitHubConfig>>(CONFIG_KEY) ?? {};
+  const session = getJson<Partial<GitHubConfig>>(CONFIG_KEY, "session");
+  const saved = session ?? getJson<Partial<GitHubConfig>>(CONFIG_KEY) ?? {};
   return {
+    remember: !session && Boolean(saved.token),
     token: saved.token ?? "",
     repo: saved.repo || import.meta.env.VITE_CONTENT_REPO || "",
     branch: saved.branch || import.meta.env.VITE_CONTENT_BRANCH || "main",
   };
 }
 
-export const saveConfig = ({ token, repo, branch }: GitHubConfig) =>
-  setJson(CONFIG_KEY, { token: token.trim(), repo: repo.trim(), branch: branch.trim() });
+// By default the token only lives for this browser tab session. Every site on
+// <user>.github.io shares one storage origin, so "remember" is opt-in.
+export function saveConfig({ token, repo, branch, remember }: GitHubConfig) {
+  const value = { token: token.trim(), repo: repo.trim(), branch: branch.trim() };
+  setJson(CONFIG_KEY, remember ? value : null);
+  setJson(CONFIG_KEY, remember ? null : value, "session");
+}
 
 async function api<T>(config: GitHubConfig, path: string, init: RequestInit = {}): Promise<T | null> {
+  if (!REPO_PATTERN.test(config.repo)) throw new Error("Repository must look like owner/name.");
   const response = await fetch(`https://api.github.com/repos/${config.repo}${path}`, {
     ...init,
     cache: "no-store",
@@ -63,7 +74,9 @@ export const publishContent = async (config: GitHubConfig, content: unknown) =>
 /** Uploads an already-optimised image and returns its content path. */
 export async function uploadImage(config: GitHubConfig, image: Blob, originalName: string) {
   const base = originalName.replace(/\.[^.]+$/, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "image";
-  const name = `${base}-${Date.now().toString(36)}.${image.type === "image/webp" ? "webp" : (originalName.split(".").pop() ?? "jpg").toLowerCase()}`;
+  const extension = EXTENSIONS[image.type];
+  if (!extension) throw new Error("Unsupported image type.");
+  const name = `${base}-${Date.now().toString(36)}.${extension}`;
   await putFile(config, `${IMAGE_DIR}/${name}`, await toBase64(image), `Add image ${name} from admin panel`);
   return `images/${name}`;
 }

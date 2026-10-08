@@ -6,3 +6,14 @@ dist/
 .env.local
 desktop.ini
 .claude/
+dist-e2e/
+test-results/
+playwright-report/
+
+# Test tooling stays local (not part of the deployed site)
+e2e/
+playwright.config.ts
+vitest.config.ts
+src/test/
+src/**/*.test.ts
+src/**/*.test.tsx

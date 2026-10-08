@@ -1,64 +1,21 @@
-import { useEffect, useState, type ComponentType, type CSSProperties } from "react";
+import { useState, type ComponentType, type CSSProperties } from "react";
 import { Icon } from "../components/Icon";
-import { Attribution, Brand, Eyebrow, Lines, PillLink, Stars, TextLink } from "../components/ui";
-import { assetUrl, formatMoney, pad2, titleCase } from "../content";
-import { useHash } from "../hooks/useHash";
+import { CocoaScrollCue } from "../components/CocoaScrollCue";
+import { Attribution, Eyebrow, Lines, PillLink, Stars, TextLink } from "../components/ui";
+import { assetUrl, formatMoney, pad2, safeColor, safeLink, titleCase } from "../content";
+import { SiteLayout } from "./Layout";
+import { ProductCard } from "./ProductCard";
 import { useStore } from "./StoreContext";
 
 // Page order. Add, remove or reorder sections here.
-const sections: ComponentType[] = [Hero, Highlight, Craft, Menu, Feature, Benefits, Stories, Delivery, Faq, Closing];
+const sections: ComponentType[] = [Hero, Highlight, Craft, Menu, Feature, Benefits, Stories, Delivery, Faq, OrderApps, Closing];
 
 export function HomePage() {
-  return (
-    <>
-      <Header />
-      <main id="main-content">{sections.map((Section, i) => <Section key={i} />)}</main>
-      <Footer />
-    </>
-  );
+  return <SiteLayout>{sections.map((Section, i) => <Section key={i} />)}</SiteLayout>;
 }
 
 const stagger = (index: number, step: number): CSSProperties => ({ transitionDelay: `${index * step}ms` });
 const entrance = (delay: number): CSSProperties => ({ animationDelay: `${delay}ms` });
-
-function useNavLinks() {
-  const { nav } = useStore().content;
-  return [
-    { href: "#menu", label: nav.menu },
-    { href: "#craft", label: nav.craft },
-    { href: "#stories", label: nav.stories },
-    { href: "#delivery", label: nav.delivery },
-  ];
-}
-
-function Header() {
-  const { content, cart, openBag } = useStore();
-  const links = useNavLinks();
-  const hash = useHash();
-  const [menuOpen, setMenuOpen] = useState(false);
-  useEffect(() => setMenuOpen(false), [hash]);
-
-  return (
-    <header className="site-header">
-      <a className="skip-link" href="#main-content">Skip to content</a>
-      <div className="container nav-shell">
-        <Brand name={content.brand.name} />
-        <nav className="desktop-nav" aria-label="Main navigation">{links.map((l) => <a href={l.href} key={l.href}>{l.label}</a>)}</nav>
-        <div className="nav-actions">
-          <button className="bag-button" type="button" onClick={openBag} aria-label={`Open your bag${cart.count ? `, ${cart.count} ${cart.count === 1 ? "item" : "items"}` : ""}`}>
-            <span className="bag-label">Your bag</span><Icon name="bag" size={19} /><span className="bag-count" aria-live="polite">{cart.count}</span>
-          </button>
-          <button className="mobile-menu-toggle" type="button" aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="mobile-navigation" onClick={() => setMenuOpen((open) => !open)}>
-            <Icon name={menuOpen ? "close" : "menu"} size={20} />
-          </button>
-        </div>
-      </div>
-      <nav id="mobile-navigation" className={`mobile-nav${menuOpen ? " is-open" : ""}`} aria-label="Mobile navigation" aria-hidden={!menuOpen}>
-        {links.map((l) => <a href={l.href} key={l.href} onClick={() => setMenuOpen(false)}>{l.label}</a>)}
-      </nav>
-    </header>
-  );
-}
 
 function Hero() {
   const { brand, hero } = useStore().content;
@@ -80,7 +37,7 @@ function Hero() {
         </div>
       </div>
       <div className="hero-caption"><span>{hero.captionLeft}</span><span>{hero.captionRight}</span></div>
-      <a className="hero-scroll" href="#love" aria-label={`Scroll to learn about ${titleCase(brand.name)}`}><span></span></a>
+      <a className="hero-scroll" href="#love" aria-label={`Scroll to learn about ${titleCase(brand.name)}`}><CocoaScrollCue /></a>
     </section>
   );
 }
@@ -121,8 +78,12 @@ function Craft() {
   );
 }
 
+/** Home shows the first few products; the full range lives on the Products page. */
+const HOME_PRODUCT_LIMIT = 4;
+
 function Menu() {
-  const { content: { menu }, cart, addToBag } = useStore();
+  const { menu } = useStore().content;
+  const hasMore = menu.products.length > HOME_PRODUCT_LIMIT;
   return (
     <section className="menu-section" id="menu" aria-labelledby="menu-title">
       <div className="container">
@@ -131,28 +92,11 @@ function Menu() {
           <p>{menu.intro}</p>
         </div>
         <div className="product-grid">
-          {menu.products.map((product, i) => {
-            const qty = cart.qtyOf(product.id);
-            return (
-              <article className="product-card" data-reveal style={stagger(i, 90)} key={product.id}>
-                <div className="product-image-wrap">
-                  <img src={assetUrl(product.image)} alt={product.imageAlt} loading="lazy" style={product.imagePosition ? { objectPosition: product.imagePosition } : undefined} />
-                  {product.label && <span className="product-ribbon">{product.label}</span>}
-                  {qty > 0 && <span className="product-in-bag"><Icon name="check" size={13} /> In your bag · {qty}</span>}
-                </div>
-                <div className="product-body">
-                  <div className="product-title-row"><h3>{product.name}</h3><span className="product-price">{formatMoney(product.price)}</span></div>
-                  <p className="product-description">{product.description}</p>
-                  <div className="product-footer">
-                    <span className="product-size">{product.size}</span>
-                    <button className="add-button" type="button" onClick={() => addToBag(product.id)} aria-label={`Add ${product.name}, ${formatMoney(product.price)}, to your bag`}>
-                      <span>{qty ? "Add another" : "Add to bag"}</span><Icon name={qty ? "plus" : "arrow-up-right"} size={qty ? 15 : 16} />
-                    </button>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+          {menu.products.slice(0, HOME_PRODUCT_LIMIT).map((product, i) => <ProductCard product={product} reveal style={stagger(i, 90)} key={product.id} />)}
+        </div>
+        <div className="menu-more" data-reveal>
+          <PillLink tone="dark" icon="arrow-right" href="#products">{menu.viewMore}</PillLink>
+          {hasMore && <span>{menu.products.length} treats in total</span>}
         </div>
         <p className="menu-footnote" data-reveal><Icon name="snow" size={15} /> {menu.footnote} <a href="#delivery">{menu.footnoteLink} <Icon name="arrow-right" size={14} /></a></p>
       </div>
@@ -249,7 +193,7 @@ function Delivery() {
           <p>{delivery.body}</p>
           {hasFree && <div className="free-delivery-note"><span className="free-delivery-icon"><Icon name="truck" size={20} /></span><span><strong>{delivery.freeTitle}</strong><small>Complimentary delivery when your order reaches {formatMoney(delivery.freeOver)}.</small></span></div>}
         </div>
-        <div className="delivery-table" data-reveal aria-label="Delivery price">
+        <div className="delivery-table" data-reveal role="group" aria-label="Delivery price">
           <div className="delivery-table-head"><span>Delivery</span><span>Price</span></div>
           <div className="delivery-row"><span><Icon name="snow" size={16} />Flat chilled delivery, every order</span><strong>{formatMoney(delivery.fee)}</strong></div>
           {hasFree && <div className="delivery-row"><span><Icon name="truck" size={16} />Orders of {formatMoney(delivery.freeOver)} or more</span><strong>Free</strong></div>}
@@ -288,6 +232,46 @@ function Faq() {
   );
 }
 
+export function OrderApps() {
+  const { brand, apps } = useStore().content;
+  if (!apps.platforms.length) return null;
+  return (
+    <section className="apps-section section-pad" id="order-apps" aria-labelledby="apps-title">
+      <div className="container apps-layout">
+        <div className="apps-copy" data-reveal>
+          <Eyebrow>{apps.eyebrow}</Eyebrow>
+          <h2 className="section-title" id="apps-title"><Lines text={apps.title} /></h2>
+          <p>{apps.body}</p>
+        </div>
+        <div className="apps-cards">
+          {apps.platforms.map((platform, i) => {
+            const href = safeLink(platform.url);
+            const body = (
+              <>
+                <span className="app-card-top">
+                  {platform.logo
+                    ? <img className="app-logo" src={assetUrl(platform.logo)} alt="" width={58} height={58} loading="lazy" decoding="async" />
+                    : <span className="app-mark" aria-hidden="true">{platform.name.charAt(0)}</span>}
+                  <span className="app-card-name"><strong>{platform.name}</strong><small>{platform.tagline}</small></span>
+                </span>
+                <span className="app-card-cta">
+                  {href ? <>Order on {platform.name}</> : <>Search “{titleCase(brand.name)}” on {platform.name}</>}
+                  {href && <span className="app-card-arrow"><Icon name="arrow-up-right" size={16} /></span>}
+                </span>
+              </>
+            );
+            const style = { "--brand": safeColor(platform.color), ...stagger(i, 100) } as CSSProperties;
+            return href
+              ? <a className="app-card" href={href} target="_blank" rel="noopener noreferrer" data-reveal style={style} key={i} aria-label={`Order ${titleCase(brand.name)} on ${platform.name} (opens in a new tab)`}>{body}</a>
+              : <div className="app-card" data-reveal style={style} key={i}>{body}</div>;
+          })}
+          {apps.note && <p className="apps-note" data-reveal><Icon name="spark" size={15} /> {apps.note}</p>}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Closing() {
   const { closing } = useStore().content;
   return (
@@ -300,22 +284,5 @@ function Closing() {
         <PillLink tone="cream" href="#menu">{closing.cta}</PillLink>
       </div>
     </section>
-  );
-}
-
-function Footer() {
-  const { brand, footer, nav } = useStore().content;
-  return (
-    <footer className="site-footer">
-      <div className="container">
-        <div className="footer-main">
-          <div className="footer-brand-column"><Brand name={brand.name} /><p><Lines text={footer.tagline} always /></p></div>
-          <div className="footer-links"><h2>{footer.tableHeading}</h2><a href="#menu">{nav.menu}</a><a href="#craft">{nav.craft}</a><a href="#stories">{nav.stories}</a></div>
-          <div className="footer-links"><h2>{footer.detailsHeading}</h2><a href="#delivery">Delivery &amp; pricing</a><a href="#faq">Questions</a><a href={`mailto:${brand.contactEmail}`}>Get in touch</a></div>
-          <div className="footer-contact"><h2>{footer.contactHeading}</h2><span>{footer.contactText}</span></div>
-        </div>
-        <div className="footer-bottom"><span>&copy; {new Date().getFullYear()} {titleCase(brand.name)} Tiramisu</span><span>{footer.bottomText}</span><a href="#faq">Ingredients &amp; allergens</a></div>
-      </div>
-    </footer>
   );
 }

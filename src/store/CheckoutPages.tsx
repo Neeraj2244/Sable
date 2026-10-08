@@ -1,7 +1,8 @@
 import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { Icon } from "../components/Icon";
-import { Brand, Eyebrow, PillLink, QuantityControl } from "../components/ui";
-import { assetUrl, formatMoney, titleCase } from "../content";
+import { Brand, Copyright, Eyebrow, PillLink, QuantityControl } from "../components/ui";
+import { assetUrl, formatMoney } from "../content";
+import { MAX_QTY } from "../hooks/useCart";
 import { useStore } from "./StoreContext";
 
 type FieldConfig = { name: string; label: string; type?: string; autoComplete?: string; placeholder?: string; half?: boolean; optional?: boolean; multiline?: boolean };
@@ -29,7 +30,7 @@ function TransactionLayout({ status, footer, className = "", children }: { statu
     <div className={`transaction-shell ${className}`}>
       <header className="transaction-header"><div className="container transaction-header-inner"><Brand name={brand.name} /><span className="secure-label">{status}</span></div></header>
       {children}
-      <footer className="transaction-footer"><div className="container"><span>&copy; {new Date().getFullYear()} {titleCase(brand.name)} Tiramisu</span>{footer}</div></footer>
+      <footer className="transaction-footer"><div className="container"><Copyright name={brand.name} />{footer}</div></footer>
     </div>
   );
 }
@@ -119,7 +120,7 @@ function OrderSummary({ country }: { country: string }) {
         {cart.lines.map(({ product, qty }) => (
           <article className="summary-item" key={product.id}>
             <div className="summary-product-image"><img src={assetUrl(product.image)} alt="" /><span>{qty}</span></div>
-            <div className="summary-product-info"><strong>{product.name}</strong><span>{product.size}</span><QuantityControl className="summary-quantity" size={12} name={product.name} qty={qty} onChange={(amount) => cart.change(product.id, amount)} /></div>
+            <div className="summary-product-info"><strong>{product.name}</strong><span>{product.size}</span><QuantityControl className="summary-quantity" size={12} max={MAX_QTY} name={product.name} qty={qty} onChange={(amount) => cart.change(product.id, amount)} /></div>
             <strong className="summary-product-price">{formatMoney(product.price * qty)}</strong>
           </article>
         ))}
