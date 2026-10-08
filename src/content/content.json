@@ -1,0 +1,227 @@
+{
+  "brand": {
+    "name": "sera",
+    "contactEmail": "hello@sera-tiramisu.com"
+  },
+  "nav": {
+    "menu": "Our tiramisu",
+    "craft": "The Sera way",
+    "stories": "At our table",
+    "delivery": "Delivery"
+  },
+  "hero": {
+    "eyebrow": "A little dolce, made slowly",
+    "headline": "The last spoonful\nis never the last.",
+    "copy": "Italian tiramisu, whisked by hand and made for the moments that run a little longer.",
+    "primaryCta": "Find your favourite",
+    "secondaryCta": "A little about us",
+    "captionLeft": "Made slowly in small batches",
+    "captionRight": "From our table to yours",
+    "image": "images/hero-tiramisu.webp",
+    "imageAlt": "A freshly made tiramisu with cocoa-dusted mascarpone layers, ready to share"
+  },
+  "highlight": {
+    "label": "A note from our table",
+    "quote": "The kind of tiramisu you plan the whole dinner around.",
+    "name": "Sofia M.",
+    "detail": "Shared with love, London",
+    "initials": "SM"
+  },
+  "craft": {
+    "eyebrow": "A few things we never rush",
+    "title": "Some things are better\ndone the slow way.",
+    "intro": "Good tiramisu is not a secret. It is a handful of beautiful things, given the time they deserve.",
+    "steps": [
+      {
+        "icon": "coffee",
+        "title": "Espresso. Properly so.",
+        "text": "Freshly pulled, deeply aromatic espresso gives our savoiardi their unmistakable first note."
+      },
+      {
+        "icon": "heart",
+        "title": "Whisked, never rushed.",
+        "text": "Mascarpone is folded by hand until it is impossibly light. That is the whole secret."
+      },
+      {
+        "icon": "snow",
+        "title": "A slow, lovely wait.",
+        "text": "Every tray rests overnight, then travels chilled so the first spoon tastes just right."
+      }
+    ]
+  },
+  "menu": {
+    "eyebrow": "Pick your little moment",
+    "title": "A good place to start.",
+    "intro": "Whisked in small batches. Sent chilled. Best enjoyed with nowhere else to be.",
+    "footnote": "Every order is packed cool and travels with care.",
+    "footnoteLink": "See delivery details",
+    "products": [
+      {
+        "id": "classico",
+        "name": "Il Classico",
+        "label": "THE ORIGINAL",
+        "description": "Our signature: bold espresso, cloud-soft mascarpone, the perfect cocoa finish.",
+        "size": "Serves 6",
+        "price": 200,
+        "image": "images/classic-tiramisu.webp",
+        "imageAlt": "A generous slice of classic tiramisu with delicate espresso and mascarpone layers"
+      },
+      {
+        "id": "pistacchio",
+        "name": "Pistacchio",
+        "label": "A LITTLE EXTRA",
+        "description": "Silky pistachio cream meets our espresso-soaked, very Italian original.",
+        "size": "Serves 6",
+        "price": 200,
+        "image": "images/pistachio-tiramisu.webp",
+        "imageAlt": "Pistachio tiramisu with creamy green pistachio layers and toasted nuts"
+      },
+      {
+        "id": "mini",
+        "name": "Piccoli Momenti",
+        "label": "SPOON-READY",
+        "description": "Little individual jars. Same slow-made layers. Absolutely no sharing required.",
+        "size": "6 small jars",
+        "price": 200,
+        "image": "images/mini-tiramisu.webp",
+        "imageAlt": "Three individual glass jars of tiramisu ready to enjoy"
+      },
+      {
+        "id": "tasting",
+        "name": "Il Giro d'Italia",
+        "label": "THE TASTING BOX",
+        "description": "A little tour of our table: Classico, Pistacchio, and the seasonal special.",
+        "size": "3 generous slices",
+        "price": 200,
+        "image": "images/tasting-box.webp",
+        "imageAlt": "Three petite tiramisu portions in classic, pistachio, and seasonal flavours",
+        "imagePosition": "71% center"
+      }
+    ]
+  },
+  "feature": {
+    "eyebrow": "The Sera way",
+    "title": "Nothing between you and the good bit.",
+    "body": "Our recipes stay close to the things that matter: real mascarpone, proper espresso, and the kind of care you can taste in the first bite.",
+    "points": [
+      "Real, familiar ingredients",
+      "Hand-layered in small batches",
+      "Chilled from our kitchen to yours"
+    ],
+    "linkLabel": "Meet the menu",
+    "image": "images/pistachio-tiramisu.webp",
+    "imageAlt": "A slice of pistachio tiramisu finished with toasted pistachios",
+    "imageNote": "A little green, a lot of amore."
+  },
+  "benefits": {
+    "eyebrow": "From us, with a little care",
+    "title": "Little details.\nBig dessert energy.",
+    "body": "We take the long way around so your tiramisu can take the shortest one to the table.",
+    "linkLabel": "How it gets to you",
+    "items": [
+      {
+        "icon": "leaf",
+        "title": "Ingredients worth slowing down for",
+        "text": "Real mascarpone, thoughtful sourcing, and absolutely no shortcuts to the good stuff."
+      },
+      {
+        "icon": "snow",
+        "title": "A cool journey, all the way",
+        "text": "Insulated, temperature-conscious packaging keeps every layer just as it should be."
+      },
+      {
+        "icon": "heart",
+        "title": "Made for the table, not the freezer",
+        "text": "Fresh in small batches, packed with care, and best shared over a long evening."
+      }
+    ]
+  },
+  "stories": {
+    "eyebrow": "Around the table",
+    "title": "A little love, passed around.",
+    "intro": "Our favourite part is hearing where you shared it.",
+    "label": "A note from the table",
+    "testimonials": [
+      {
+        "quote": "One bite and our whole table went quiet. That is how you know it is the real thing.",
+        "name": "Sofia M.",
+        "detail": "Dinner at home, London",
+        "initials": "SM"
+      },
+      {
+        "quote": "Like the little trattoria we found on our honeymoon. Only now it arrives at our door.",
+        "name": "Daniel R.",
+        "detail": "A regular at the table, New York",
+        "initials": "DR"
+      },
+      {
+        "quote": "The pistachio one is dangerously good. I order it for guests and keep the last slice for myself.",
+        "name": "Lucia P.",
+        "detail": "Pistacchio enthusiast, Milan",
+        "initials": "LP"
+      }
+    ]
+  },
+  "delivery": {
+    "eyebrow": "From our table to yours",
+    "title": "Good things travel cool.",
+    "body": "We pack every order for the journey and charge one flat delivery fee, shown before you pay. No little surprises at the end.",
+    "fee": 50,
+    "freeOver": 0,
+    "freeTitle": "Our little thank-you",
+    "note": "Every order is packed in insulated, chilled packaging."
+  },
+  "faq": {
+    "eyebrow": "Before the first spoonful",
+    "title": "A few good things to know.",
+    "intro": "Need something we have not covered? We would love to hear from you.",
+    "linkLabel": "Write us a little note",
+    "items": [
+      {
+        "question": "How does my tiramisu arrive?",
+        "answer": "Every order is packed in a temperature-controlled, insulated box with chilled gel packs. It is made to stay cool and lovely on its journey to your door."
+      },
+      {
+        "question": "How much is delivery?",
+        "answer": "Delivery is one flat fee on every order, and you will see it in your bag before you pay."
+      },
+      {
+        "question": "How long will it stay fresh?",
+        "answer": "Keep your tiramisu refrigerated and enjoy it within three days of delivery. It is made fresh in small batches, with no preservatives."
+      },
+      {
+        "question": "Can I order for a special occasion?",
+        "answer": "Absolutely. Add a note for our kitchen at checkout. For larger celebrations, write to us and we will help you plan."
+      },
+      {
+        "question": "What about allergens?",
+        "answer": "Our traditional tiramisu contains milk, wheat, and eggs. Some recipes include nuts. Full ingredient and allergen information is included with each product before checkout."
+      }
+    ]
+  },
+  "closing": {
+    "eyebrow": "Your table called",
+    "title": "There is always room\nfor one more spoon.",
+    "body": "Pick a favourite. Put the kettle on. Let the evening take its time.",
+    "cta": "Find your tiramisu"
+  },
+  "footer": {
+    "tagline": "Tiramisu for the long evenings.\nMade slowly, wherever you call home.",
+    "tableHeading": "At the table",
+    "detailsHeading": "Little details",
+    "contactHeading": "From our kitchen",
+    "contactText": "Made with amore, in Italy.",
+    "bottomText": "Small batch. Slow evening."
+  },
+  "checkout": {
+    "eyebrow": "One last little thing",
+    "title": "Let's get this to you.",
+    "intro": "Your tiramisu is being made with care. Tell us where to send it.",
+    "defaultCountry": "India"
+  },
+  "success": {
+    "eyebrow": "A little something to look forward to",
+    "title": "That's amore.",
+    "flourish": "Made slowly. Sent with love."
+  }
+}
