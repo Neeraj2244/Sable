@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ConsentBanner } from "../components/ConsentBanner";
 import { Icon } from "../components/Icon";
+import { track } from "../lib/analytics";
 import type { SiteContent } from "../content/types";
 import { MAX_QTY, useCart } from "../hooks/useCart";
 import { useHash } from "../hooks/useHash";
@@ -8,20 +10,21 @@ import { BagDrawer } from "./BagDrawer";
 import { CheckoutPage, SuccessPage } from "./CheckoutPages";
 import { HomePage } from "./HomePage";
 import { ProductsPage } from "./ProductsPage";
+import { homeUrl, isProductsPath, navigate, pageFor, productsUrl } from "./routes";
 import { StoreContext, type Store, type StorePage } from "./StoreContext";
-
-// Hashes that are whole pages; any other hash is an anchor on the home page.
-const PAGES = new Set<string>(["products", "payment", "success"]);
-const toPage = (hash: string) => (PAGES.has(hash) ? hash : "home") as StorePage;
 
 // randomUUID needs a recent browser and a secure context; fall back for the rest.
 const orderId = () => (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2) + Date.now().toString(36)).replace(/-/g, "").slice(0, 8).toUpperCase();
 
-export default function Storefront({ content }: { content: SiteContent }) {
+/** `path` lets the build pre-render a specific page; in the browser the real URL is used. */
+export default function Storefront({ content, path }: { content: SiteContent; path?: string }) {
   const [order, setOrder] = useState<{ number: string; email: string } | null>(null);
-  const requested = toPage(useHash());
+  const pathname = path ?? (typeof window === "undefined" ? "/" : window.location.pathname);
+  const basePage: StorePage = isProductsPath(pathname) ? "products" : "home";
+  const hash = useHash();
+  const requested = pageFor(pathname, hash);
   // The confirmation page only exists for an order placed in this visit.
-  const page = requested === "success" && !order ? "home" : requested;
+  const page = requested === "success" && !order ? basePage : requested;
 
   const cart = useCart(content.menu.products, content.delivery);
   const [bagOpen, setBagOpen] = useState(false);
@@ -31,15 +34,25 @@ export default function Storefront({ content }: { content: SiteContent }) {
 
   useReveal();
 
+  // Page views for in-page changes (GA4 and Meta record the first load themselves).
+  const firstPage = useRef(true);
   useEffect(() => {
-    setBagOpen(page === "home" && reopenBag.current);
+    if (firstPage.current) return void (firstPage.current = false);
+    track("page_view", { page_location: window.location.href, page_title: document.title });
+  }, [page]);
+
+  // Links shared before the Products page had its own address (#products) still work.
+  useEffect(() => { if (hash === "products") window.location.replace(productsUrl()); }, [hash]);
+
+  useEffect(() => {
+    setBagOpen(page === basePage && reopenBag.current);
     reopenBag.current = false;
     // Arriving on home from another page with an anchor (e.g. #delivery): the
     // section did not exist when the browser tried to jump, so jump now.
     const anchor = page === "home" && window.location.hash.length > 1 ? document.getElementById(window.location.hash.slice(1)) : null;
     if (anchor) anchor.scrollIntoView();
     else window.scrollTo({ top: 0 });
-  }, [page]);
+  }, [page, basePage]);
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
@@ -50,27 +63,32 @@ export default function Storefront({ content }: { content: SiteContent }) {
   }, []);
 
   const goTo = useCallback((next: StorePage) => {
-    const target = next === "home" ? "#menu" : `#${next}`;
-    if (window.location.hash !== target) return void (window.location.hash = target);
+    const target = new URL(next === "home" ? homeUrl("menu") : next === "products" ? productsUrl() : `#${next}`, window.location.href);
+    if (next === "payment") track("begin_checkout", { currency: "INR", value: cart.total });
+    if (target.href !== window.location.href) return navigate(target.href);
     setBagOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  }, [cart.total]);
 
   const store = useMemo<Store>(() => ({
+    page,
     content,
     cart,
     goTo,
     openBag: () => setBagOpen(true),
     returnToBag: () => {
-      if (page === "home") return setBagOpen(true);
+      if (page === basePage) return setBagOpen(true);
       reopenBag.current = true;
-      goTo("home");
+      navigate(basePage === "products" ? productsUrl() : homeUrl("menu"));
     },
     addToBag: (id) => {
-      const name = content.menu.products.find((p) => p.id === id)?.name ?? "Tiramisu";
-      showToast(cart.add(id) ? `${name} added to your bag.` : `You can add up to ${MAX_QTY} of ${name} per order.`);
+      const product = content.menu.products.find((p) => p.id === id);
+      const name = product?.name ?? "Tiramisu";
+      const added = cart.add(id);
+      if (added && product) track("add_to_cart", { currency: "INR", value: product.price, items: [{ item_id: product.id, item_name: product.name, price: product.price, quantity: 1 }] });
+      showToast(added ? `${name} added to your bag.` : `You can add up to ${MAX_QTY} of ${name} per order.`);
     },
-  }), [content, cart, goTo, page, showToast]);
+  }), [content, cart, goTo, page, basePage, showToast]);
 
   const placeOrder = (email: string) => {
     setOrder({ number: `SERA-${orderId()}`, email });
@@ -87,6 +105,7 @@ export default function Storefront({ content }: { content: SiteContent }) {
         {page === "success" && order && <SuccessPage email={order.email} orderNumber={order.number} />}
         <BagDrawer open={bagOpen} onClose={() => setBagOpen(false)} />
         <Toast text={toast} onDismiss={() => setToast("")} />
+        <ConsentBanner seo={content.seo} />
       </div>
     </StoreContext.Provider>
   );

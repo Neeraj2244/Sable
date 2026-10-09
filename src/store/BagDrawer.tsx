@@ -6,7 +6,7 @@ import { useDialog } from "../hooks/useDialog";
 import { useStore } from "./StoreContext";
 
 export function BagDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { cart, content, goTo } = useStore();
+  const { cart, goTo } = useStore();
   const ref = useDialog<HTMLElement>(open, onClose);
   if (!open) return null;
 
@@ -40,7 +40,7 @@ export function BagDrawer({ open, onClose }: { open: boolean; onClose: () => voi
             </div>
             <div className="drawer-footer">
               <div className="drawer-subtotal"><span>Subtotal</span><strong>{formatMoney(cart.subtotal)}</strong></div>
-              <p><Icon name="snow" size={15} /> {cart.free ? "Your order ships free." : `Flat ${formatMoney(content.delivery.fee)} chilled delivery, added at checkout.`}</p>
+              <p><Icon name="snow" size={15} /> {cart.free ? "Your order ships free." : "Packed cool for the journey. Delivery is added at checkout."}</p>
               <PillButton tone="dark" className="drawer-checkout" onClick={() => goTo("payment")}>Continue to checkout</PillButton>
               <button className="continue-shopping" type="button" onClick={onClose}>Keep browsing</button>
             </div>

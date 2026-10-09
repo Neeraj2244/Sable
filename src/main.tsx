@@ -28,4 +28,10 @@ function Root() {
   );
 }
 
+// Links shared before the Products page had its own address: redirect before anything renders.
+if (window.location.hash === "#products") window.location.replace(`${import.meta.env.BASE_URL}products/`);
+
+// Scroll fade-ins apply only from here on; the pre-rendered HTML is fully visible without JS.
+document.documentElement.classList.add("js");
+// createRoot replaces the pre-rendered markup (from scripts/seo.mjs) with the live app.
 createRoot(document.getElementById("root")!).render(<StrictMode><Root /></StrictMode>);

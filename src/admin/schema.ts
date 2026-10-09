@@ -49,6 +49,16 @@ export const sections: Section[] = [
   { id: "brand", title: "Brand & contact", description: "The name in the logo and the email used in every “get in touch” link.", fields: [
     text("name", "Brand name", "Shown in the logo and the large hero word."), { key: "contactEmail", label: "Contact email", type: "email" },
   ] },
+  { id: "seo", title: "Search & sharing", description: "How the site appears in Google results and in link previews on WhatsApp, Instagram and Facebook. Updates on the next publish.", fields: [
+    text("title", "Page title", "Shown as the headline in Google results and browser tabs. About 50–60 characters works best."),
+    area("description", "Search description", "The grey text under the title in Google results. About 140–160 characters works best."),
+    { key: "shareImage", label: "Link preview image", type: "image", hint: "Shown when the link is shared. A wide photo (about 1200 × 630) works best; JPG is the most widely supported." },
+    text("city", "City", "Optional. Helps local searches such as “tiramisu in Mumbai”."),
+    text("phone", "Phone number", "Optional, e.g. +91 98765 43210. Shown to Google as your business contact."),
+    text("googleVerification", "Google Search Console code", "Optional. In Search Console choose “HTML tag” and paste only the content value (the long code), not the whole tag."),
+    text("ga4Id", "Google Analytics 4 ID", "Optional, e.g. G-ABC123XYZ. Visitors are asked for consent before it loads."),
+    text("metaPixelId", "Meta Pixel ID", "Optional, digits only. For Instagram/Facebook ads. Visitors are asked for consent before it loads."),
+  ] },
   { id: "nav", title: "Navigation", description: "Labels for the top menu and footer links.", fields: [
     text("products", "Products tab"), text("menu", "Home menu link", "Used in the footer."), text("craft", "About link"), text("stories", "Reviews link"), text("delivery", "Delivery link"),
   ] },

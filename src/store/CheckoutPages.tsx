@@ -3,6 +3,7 @@ import { Icon } from "../components/Icon";
 import { Brand, Copyright, Eyebrow, PillLink, QuantityControl } from "../components/ui";
 import { assetUrl, formatMoney } from "../content";
 import { MAX_QTY } from "../hooks/useCart";
+import { homeUrl } from "./routes";
 import { useStore } from "./StoreContext";
 
 type FieldConfig = { name: string; label: string; type?: string; autoComplete?: string; placeholder?: string; half?: boolean; optional?: boolean; multiline?: boolean };
@@ -59,7 +60,7 @@ export function CheckoutPage({ onSubmit }: { onSubmit: (email: string) => void }
               <Eyebrow dot={false}>A little pause</Eyebrow>
               <h1>Your bag is waiting for something lovely.</h1>
               <p>Choose your tiramisu and we will bring you right back here.</p>
-              <PillLink tone="dark" icon="arrow-right" href="#menu">Back to the menu</PillLink>
+              <PillLink tone="dark" icon="arrow-right" href={homeUrl("menu")}>Back to the menu</PillLink>
             </div>
           ) : (
             <>
@@ -150,7 +151,7 @@ export function SuccessPage({ email, orderNumber }: { email: string; orderNumber
           <p className="success-lede">Your order is on its way to becoming something lovely.{email && <> We&apos;ll send the details to <strong>{email}</strong>.</>}</p>
           {orderNumber && <div className="order-number"><span>Your order preview</span><strong>{orderNumber}</strong></div>}
           <p className="success-demo-note">This is a storefront preview. No payment has been processed.</p>
-          <PillLink tone="dark" icon="arrow-right" href="#menu">Back to the table</PillLink>
+          <PillLink tone="dark" icon="arrow-right" href={homeUrl("menu")}>Back to the table</PillLink>
           <div className="success-flourish" aria-hidden="true">{success.flourish}</div>
         </div>
       </main>

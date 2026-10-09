@@ -4,8 +4,8 @@ import { assetUrl, DRAFT_STORAGE_KEY, normalizeContent, publishedContent, readDr
 import { iconNames, type IconName, type SiteContent } from "../content/types";
 import { useDialog } from "../hooks/useDialog";
 import { getJson, setJson } from "../lib/storage";
-import { authConfigured, hasSession, signIn, signOut } from "./auth";
-import { checkAccess, loadConfig, publishContent, saveConfig, uploadImage, type GitHubConfig } from "./github";
+import { authConfigured, sessionKey, signIn, signOut, type Bytes } from "./auth";
+import { checkAccess, defaultConfig, loadConfig, publishContent, saveConfig, uploadImage, type GitHubConfig } from "./github";
 import { optimiseImage } from "./image";
 import { findLimitErrors, sections, type Field, type ListField } from "./schema";
 import "./admin.css";
@@ -33,9 +33,12 @@ function getIn(target: unknown, path: Path): unknown {
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
 export default function AdminApp() {
-  const [signedIn, setSignedIn] = useState(() => hasSession());
-  if (!signedIn) return <LoginScreen onSignedIn={() => setSignedIn(true)} />;
-  return <Editor onSignOut={() => { signOut(); setSignedIn(false); }} />;
+  // undefined while checking the stored session; null when signed out.
+  const [secret, setSecret] = useState<Bytes | null | undefined>(undefined);
+  useEffect(() => { void sessionKey().then(setSecret); }, []);
+  if (secret === undefined) return null;
+  if (!secret) return <LoginScreen onSignedIn={() => void sessionKey().then(setSecret)} />;
+  return <Editor secret={secret} onSignOut={() => { signOut(); setSecret(null); }} />;
 }
 
 function LoginScreen({ onSignedIn }: { onSignedIn: () => void }) {
@@ -76,7 +79,7 @@ function LoginScreen({ onSignedIn }: { onSignedIn: () => void }) {
   );
 }
 
-function Editor({ onSignOut }: { onSignOut: () => void }) {
+function Editor({ secret, onSignOut }: { secret: Bytes; onSignOut: () => void }) {
   const [baseline, setBaseline] = useState<SiteContent>(() => {
     const raw = getJson<unknown>(PUBLISHED_KEY);
     const stored = raw ? normalizeContent(raw) : null;
@@ -89,7 +92,8 @@ function Editor({ onSignOut }: { onSignOut: () => void }) {
   });
   const [draft, setDraft] = useState<SiteContent>(() => readDraft() ?? baseline);
   const [activeId, setActiveId] = useState<string>(sections[0].id);
-  const [config, setConfig] = useState<GitHubConfig>(() => loadConfig());
+  const [config, setConfig] = useState<GitHubConfig>(defaultConfig);
+  useEffect(() => { void loadConfig(secret).then(setConfig); }, [secret]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [status, setStatus] = useState<Status>(null);
   const [publishing, setPublishing] = useState(false);
@@ -202,9 +206,9 @@ function Editor({ onSignOut }: { onSignOut: () => void }) {
     window.open(`${import.meta.env.BASE_URL}?preview=1`, "_blank", "noopener");
   };
 
-  const saveSettings = (next: GitHubConfig) => {
-    saveConfig(next);
-    setConfig(loadConfig());
+  const saveSettings = async (next: GitHubConfig) => {
+    await saveConfig(next, secret);
+    setConfig(await loadConfig(secret));
     setSettingsOpen(false);
     setStatus({ tone: "success", text: next.remember ? "Publishing settings saved on this device." : "Publishing settings saved until you close this tab." });
   };

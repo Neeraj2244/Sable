@@ -55,7 +55,7 @@ export const Copyright = ({ name }: { name: string }) => <span>&copy; {new Date(
 
 export function Brand({ name }: { name: string }) {
   return (
-    <a className="brand" href="#top" aria-label={`${titleCase(name)} home`}>
+    <a className="brand" href={import.meta.env.BASE_URL} aria-label={`${titleCase(name)} home`}>
       <span className="brand-emblem" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M5 17c5.2 0 5.2-10 10.4-10s5.2 18 10.4 18M5 23c5.2 0 5.2-10 10.4-10s5.2 12 10.4 12" /><circle cx="16" cy="16" r="14.5" /></svg></span>
       <span className="brand-name">{name}<span>.</span></span>
     </a>

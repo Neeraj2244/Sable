@@ -29,6 +29,8 @@ export type Platform = { name: string; tagline: string; url: string; logo?: stri
 // Multi-line titles use "\n" to mark where the desktop line break goes.
 export type SiteContent = {
   brand: { name: string; contactEmail: string };
+  /** Search results, link previews and Google business details. Applied at build time by scripts/seo.mjs. */
+  seo: { title: string; description: string; shareImage: string; city: string; phone: string; googleVerification: string; ga4Id: string; metaPixelId: string };
   nav: { products: string; menu: string; craft: string; stories: string; delivery: string };
   hero: { eyebrow: string; headline: string; copy: string; primaryCta: string; secondaryCta: string; captionLeft: string; captionRight: string; image: string; imageAlt: string };
   highlight: { label: string; quote: string; name: string; detail: string; initials: string };

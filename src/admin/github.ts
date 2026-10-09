@@ -1,6 +1,7 @@
 // Publishes admin edits by committing to the repo through the GitHub API.
 // Each commit triggers .github/workflows/deploy.yml, which rebuilds the site.
 import { getJson, setJson } from "../lib/storage";
+import type { Bytes } from "./auth";
 
 const CONTENT_PATH = "src/content/content.json";
 const IMAGE_DIR = "public/images";
@@ -12,21 +13,48 @@ const CONFIG_KEY = "sable-admin-github";
 
 export type GitHubConfig = { token: string; repo: string; branch: string; remember: boolean };
 
-export function loadConfig(): GitHubConfig {
-  const session = getJson<Partial<GitHubConfig>>(CONFIG_KEY, "session");
-  const saved = session ?? getJson<Partial<GitHubConfig>>(CONFIG_KEY) ?? {};
-  return {
-    remember: !session && Boolean(saved.token),
-    token: saved.token ?? "",
-    repo: saved.repo || import.meta.env.VITE_CONTENT_REPO || "",
-    branch: saved.branch || import.meta.env.VITE_CONTENT_BRANCH || "main",
-  };
+// What is written to browser storage: the token only ever in encrypted form.
+type Stored = { repo?: string; branch?: string; iv?: string; token?: string };
+
+export const defaultConfig = (): GitHubConfig => ({
+  token: "",
+  remember: false,
+  repo: import.meta.env.VITE_CONTENT_REPO || "",
+  branch: import.meta.env.VITE_CONTENT_BRANCH || "main",
+});
+
+// AES-GCM key bound to the admin's password-derived session key (auth.ts).
+async function tokenCipher(secret: Bytes) {
+  const base = await crypto.subtle.importKey("raw", secret, "HKDF", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "HKDF", hash: "SHA-256", salt: new Uint8Array(32), info: new TextEncoder().encode("sable-github-token") },
+    base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"],
+  );
+}
+const toB64 = (bytes: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(bytes)));
+const fromB64 = (text: string) => Uint8Array.from(atob(text), (ch) => ch.charCodeAt(0));
+
+/** Reads saved settings; the token decrypts only with the signed-in admin's key. */
+export async function loadConfig(secret: Bytes | null): Promise<GitHubConfig> {
+  const session = getJson<Stored>(CONFIG_KEY, "session");
+  const saved = session ?? getJson<Stored>(CONFIG_KEY) ?? {};
+  let token = "";
+  if (secret && saved.iv && saved.token) {
+    try {
+      const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64(saved.iv) }, await tokenCipher(secret), fromB64(saved.token));
+      token = new TextDecoder().decode(plain);
+    } catch { /* different password or tampered value: ask for the token again */ }
+  }
+  const defaults = defaultConfig();
+  return { token, remember: !session && Boolean(token), repo: saved.repo || defaults.repo, branch: saved.branch || defaults.branch };
 }
 
-// By default the token only lives for this browser tab session. Every site on
-// <user>.github.io shares one storage origin, so "remember" is opt-in.
-export function saveConfig({ token, repo, branch, remember }: GitHubConfig) {
-  const value = { token: token.trim(), repo: repo.trim(), branch: branch.trim() };
+// By default settings last for this browser tab only; "remember" keeps them on
+// the device. Either way the token is stored encrypted, never in plain text.
+export async function saveConfig({ token, repo, branch, remember }: GitHubConfig, secret: Bytes) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await tokenCipher(secret), new TextEncoder().encode(token.trim()));
+  const value: Stored = { repo: repo.trim(), branch: branch.trim(), iv: toB64(iv), token: toB64(encrypted) };
   setJson(CONFIG_KEY, remember ? value : null);
   setJson(CONFIG_KEY, remember ? null : value, "session");
 }

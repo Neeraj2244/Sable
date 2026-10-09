@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { Icon } from "../components/Icon";
+import { OPEN_CONSENT_EVENT } from "../components/ConsentBanner";
 import { Brand, Copyright, Lines } from "../components/ui";
+import { analyticsConfigured } from "../lib/analytics";
 import { useHash } from "../hooks/useHash";
+import { homeUrl, productsUrl } from "./routes";
 import { useStore } from "./StoreContext";
 
 /** Shared chrome for every storefront page that shows the main navigation. */
@@ -23,14 +26,14 @@ export function SiteLayout({ children }: { children: ReactNode }) {
 }
 
 function Header() {
-  const { content: { brand, nav }, cart, openBag } = useStore();
+  const { content: { brand, nav }, cart, openBag, page } = useStore();
   const hash = useHash();
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => setMenuOpen(false), [hash]);
 
-  const links: [string, string][] = [["#products", nav.products], ["#craft", nav.craft], ["#stories", nav.stories], ["#delivery", nav.delivery]];
+  const links: [string, string][] = [[productsUrl(), nav.products], [homeUrl("craft"), nav.craft], [homeUrl("stories"), nav.stories], [homeUrl("delivery"), nav.delivery]];
   const linkItems = (onClick?: () => void) => links.map(([href, label]) => (
-    <a href={href} key={href} aria-current={hash === "products" && href === "#products" ? "page" : undefined} onClick={onClick}>{label}</a>
+    <a href={href} key={href} aria-current={page === "products" && href === productsUrl() ? "page" : undefined} onClick={onClick}>{label}</a>
   ));
 
   return (
@@ -53,10 +56,10 @@ function Header() {
 }
 
 function Footer() {
-  const { brand, footer, nav } = useStore().content;
+  const { brand, footer, nav, seo } = useStore().content;
   const columns: { heading: string; links: [string, string][] }[] = [
-    { heading: footer.tableHeading, links: [["#products", nav.products], ["#menu", nav.menu], ["#craft", nav.craft], ["#stories", nav.stories]] },
-    { heading: footer.detailsHeading, links: [["#delivery", "Delivery & pricing"], ["#faq", "Questions"], [`mailto:${brand.contactEmail}`, "Get in touch"]] },
+    { heading: footer.tableHeading, links: [[productsUrl(), nav.products], [homeUrl("menu"), nav.menu], [homeUrl("craft"), nav.craft], [homeUrl("stories"), nav.stories]] },
+    { heading: footer.detailsHeading, links: [[homeUrl("delivery"), "Delivery & pricing"], [homeUrl("faq"), "Questions"], [`mailto:${brand.contactEmail}`, "Get in touch"]] },
   ];
   return (
     <footer className="site-footer">
@@ -71,7 +74,7 @@ function Footer() {
           ))}
           <div className="footer-contact"><h2>{footer.contactHeading}</h2><span>{footer.contactText}</span></div>
         </div>
-        <div className="footer-bottom"><Copyright name={brand.name} /><span>{footer.bottomText}</span><a href="#faq">Ingredients &amp; allergens</a></div>
+        <div className="footer-bottom"><Copyright name={brand.name} /><span>{footer.bottomText}</span><a href={homeUrl("faq")}>Ingredients &amp; allergens</a>{analyticsConfigured(seo) && <button type="button" className="footer-link-button" onClick={() => window.dispatchEvent(new Event(OPEN_CONSENT_EVENT))}>Cookie settings</button>}</div>
       </div>
     </footer>
   );

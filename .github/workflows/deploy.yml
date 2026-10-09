@@ -39,7 +39,9 @@ jobs:
 
       - name: Build
         env:
-          VITE_BASE: /${{ github.event.repository.name }}/
+          # Public address of the site. For a custom domain, set the SITE_URL repository variable
+          # (Settings → Secrets and variables → Actions → Variables), e.g. https://seratiramisu.com/
+          VITE_SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
           VITE_CONTENT_REPO: ${{ github.repository }}
           VITE_CONTENT_BRANCH: ${{ github.ref_name }}
         run: npm run build

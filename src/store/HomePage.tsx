@@ -4,6 +4,7 @@ import { CocoaScrollCue } from "../components/CocoaScrollCue";
 import { Attribution, Eyebrow, Lines, PillLink, Stars, TextLink } from "../components/ui";
 import { assetUrl, formatMoney, pad2, safeColor, safeLink, titleCase } from "../content";
 import { SiteLayout } from "./Layout";
+import { productsUrl } from "./routes";
 import { ProductCard } from "./ProductCard";
 import { useStore } from "./StoreContext";
 
@@ -95,7 +96,7 @@ function Menu() {
           {menu.products.slice(0, HOME_PRODUCT_LIMIT).map((product, i) => <ProductCard product={product} reveal style={stagger(i, 90)} key={product.id} />)}
         </div>
         <div className="menu-more" data-reveal>
-          <PillLink tone="dark" icon="arrow-right" href="#products">{menu.viewMore}</PillLink>
+          <PillLink tone="dark" icon="arrow-right" href={productsUrl()}>{menu.viewMore}</PillLink>
           {hasMore && <span>{menu.products.length} treats in total</span>}
         </div>
         <p className="menu-footnote" data-reveal><Icon name="snow" size={15} /> {menu.footnote} <a href="#delivery">{menu.footnoteLink} <Icon name="arrow-right" size={14} /></a></p>
@@ -186,19 +187,22 @@ function Delivery() {
   const hasFree = delivery.freeOver > 0;
   return (
     <section className="delivery-section section-pad" id="delivery" aria-labelledby="delivery-title">
-      <div className="container delivery-layout">
+      {/* The delivery fee itself is shown only at checkout; this section shows the free-delivery offer when there is one. */}
+      <div className={`container delivery-layout${hasFree ? "" : " is-single"}`}>
         <div className="delivery-copy" data-reveal>
           <Eyebrow>{delivery.eyebrow}</Eyebrow>
           <h2 className="section-title" id="delivery-title"><Lines text={delivery.title} /></h2>
           <p>{delivery.body}</p>
           {hasFree && <div className="free-delivery-note"><span className="free-delivery-icon"><Icon name="truck" size={20} /></span><span><strong>{delivery.freeTitle}</strong><small>Complimentary delivery when your order reaches {formatMoney(delivery.freeOver)}.</small></span></div>}
+          {!hasFree && delivery.note && <p className="delivery-note"><Icon name="snow" size={16} /> {delivery.note}</p>}
         </div>
-        <div className="delivery-table" data-reveal role="group" aria-label="Delivery price">
-          <div className="delivery-table-head"><span>Delivery</span><span>Price</span></div>
-          <div className="delivery-row"><span><Icon name="snow" size={16} />Flat chilled delivery, every order</span><strong>{formatMoney(delivery.fee)}</strong></div>
-          {hasFree && <div className="delivery-row"><span><Icon name="truck" size={16} />Orders of {formatMoney(delivery.freeOver)} or more</span><strong>Free</strong></div>}
-          {delivery.note && <p>{delivery.note}</p>}
-        </div>
+        {hasFree && (
+          <div className="delivery-table" data-reveal role="group" aria-label="Free delivery">
+            <div className="delivery-table-head"><span>Delivery</span><span>Price</span></div>
+            <div className="delivery-row"><span><Icon name="truck" size={16} />Orders of {formatMoney(delivery.freeOver)} or more</span><strong>Free</strong></div>
+            {delivery.note && <p>{delivery.note}</p>}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -5,6 +5,7 @@ import type { useCart } from "../hooks/useCart";
 export type StorePage = "home" | "products" | "payment" | "success";
 
 export type Store = {
+  page: StorePage;
   content: SiteContent;
   cart: ReturnType<typeof useCart>;
   addToBag: (id: string) => void;

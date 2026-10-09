@@ -3,6 +3,16 @@
     "name": "sera",
     "contactEmail": "hellocake@sera-tiramisu.com"
   },
+  "seo": {
+    "title": "Sera Tiramisu | Made slowly, shared with love",
+    "description": "Italian tiramisu, whisked by hand in small batches and delivered chilled. Order Il Classico, Pistacchio and more, or find us on Zomato and Swiggy.",
+    "shareImage": "images/share.jpg",
+    "city": "",
+    "phone": "",
+    "googleVerification": "",
+    "ga4Id": "",
+    "metaPixelId": ""
+  },
   "nav": {
     "products": "Products",
     "menu": "Our tiramisu",
@@ -189,7 +199,7 @@
   "delivery": {
     "eyebrow": "From our table to yours",
     "title": "Good things travel cool.",
-    "body": "We pack every order for the journey and charge one flat delivery fee, shown before you pay. No little surprises at the end.",
+    "body": "We pack every order with care for the journey, so it arrives cool and just as it left our kitchen.",
     "fee": 50,
     "freeOver": 0,
     "freeTitle": "Our little thank-you",
@@ -204,10 +214,6 @@
       {
         "question": "How does my tiramisu arrive?",
         "answer": "Every order is packed in a temperature-controlled, insulated box with chilled gel packs. It is made to stay cool and lovely on its journey to your door."
-      },
-      {
-        "question": "How much is delivery?",
-        "answer": "Delivery is one flat fee on every order, and you will see it in your bag before you pay."
       },
       {
         "question": "How long will it stay fresh?",
@@ -227,7 +233,7 @@
     "eyebrow": "Craving it a little sooner?",
     "title": "Also on Zomato\nand Swiggy.",
     "body": "Same slow-made tiramisu, through the apps you already love. Perfect for a last-minute dessert run or a sweet surprise at the door.",
-    "note": "Prices, delivery times and offers on Zomato and Swiggy are set by each app and may differ from ours.",
+    "note": "",
     "platforms": [
       {
         "name": "Zomato",
